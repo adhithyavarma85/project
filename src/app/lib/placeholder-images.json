@@ -1,0 +1,17 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-medical",
+      "description": "Professional medical laboratory",
+      "imageUrl": "https://picsum.photos/seed/med1/1200/800",
+      "imageHint": "medical laboratory"
+    },
+    {
+      "id": "scanning-process",
+      "description": "Medical scan analysis",
+      "imageUrl": "https://picsum.photos/seed/med2/600/400",
+      "imageHint": "mri scan"
+    }
+  ]
+}

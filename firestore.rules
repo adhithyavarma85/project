@@ -1,0 +1,96 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * FIRESTORE SECURITY RULES - PROTOTYPING MODE
+     * 
+     * Core Philosophy: 
+     * This ruleset enforces a strict user-ownership model. All data access is gated by the 
+     * authenticated user's UID, ensuring that users can only interact with their own data.
+     * 
+     * Data Structure: 
+     * Data is organized hierarchically under /user_profiles/{userId}. 
+     * Diagnostic results are stored as subcollections of the specific user profile they belong to.
+     * 
+     * Key Security Decisions:
+     * 1. Strict Ownership: Access to any document requires the requester's UID to match 
+     *    the {userId} path parameter.
+     * 2. Self-Provisioning: Users are permitted to create their own profile document 
+     *    provided the document ID matches their Firebase Authentication UID.
+     * 3. Denormalized Authorization: Diagnostic results include a 'userId' field. 
+     *    Rules validate that this field matches the path and the authenticated user 
+     *    to ensure relational integrity without cross-document lookups.
+     * 4. Flexible Schema: In this prototyping phase, rules do not enforce data types 
+     *    or specific field presence (except for ID/Ownership fields), allowing for 
+     *    rapid iteration on the data model.
+     * 
+     * Denormalization for Authorization:
+     * - UserProfile documents must contain an 'id' field matching the document ID.
+     * - DiagnosticResult documents must contain a 'userId' field matching the parent path.
+     */
+
+    // --- Global Helper Functions ---
+
+    /** @description Checks if the request is made by an authenticated user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** @description Validates ownership and ensures the document exists for state-changing operations. */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for user profile documents. Ensures users only access/edit their own profiles.
+     * @path /user_profiles/{userId}
+     * @allow (get) request.auth.uid == "user_123" on /user_profiles/user_123
+     * @deny (list) request.auth.uid == "user_456" on /user_profiles/ (listing all profiles)
+     * @principle Enforces document ownership for all CRUD operations via path-matching and UID verification.
+     */
+    match /user_profiles/{userId} {
+      allow get, list: if isOwner(userId);
+      
+      // Relational Integrity: On create, internal 'id' must match the document ID (the UID).
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      
+      // Relational Integrity: On update, the 'id' field must remain immutable.
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for diagnostic results nested under a specific user profile.
+       * @path /user_profiles/{userId}/diagnostic_results/{diagnosticResultId}
+       * @allow (create) request.auth.uid == "user_123" and data.userId == "user_123"
+       * @deny (update) request.auth.uid == "user_123" trying to change userId field to "user_999"
+       * @principle Combines path-based authorization with internal field validation to ensure data consistency.
+       */
+      match /diagnostic_results/{diagnosticResultId} {
+        allow get, list: if isOwner(userId);
+
+        // Relational Integrity: On create, the internal 'userId' field must match the path owner.
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+
+        // Relational Integrity: On update, the 'userId' owner link must remain immutable.
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+
+        allow delete: if isExistingOwner(userId);
+      }
+    }
+
+    // --- Default Deny ---
+    // If a path is not explicitly matched above, access is denied.
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

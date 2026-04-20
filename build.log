@@ -1,0 +1,45 @@
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\Lenovo\package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * C:\Users\Lenovo\Downloads\project\package-lock.json
+
+   ▲ Next.js 15.5.9
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 11.2s
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/8) ...
+Automatic initialization failed. Falling back to firebase config object. Error [FirebaseError]: Firebase: Need to provide options, when not being deployed to hosting via source. (app/no-options).
+    at W (C:\Users\Lenovo\Downloads\project\.next\server\chunks\624.js:1:78074)
+    at k (C:\Users\Lenovo\Downloads\project\.next\server\chunks\951.js:1:8706)
+    at <unknown> (C:\Users\Lenovo\Downloads\project\.next\server\chunks\951.js:1:222)
+    at h (C:\Users\Lenovo\Downloads\project\.next\server\chunks\951.js:1:209) {
+  code: 'app/no-options',
+  customData: {}
+}
+   Generating static pages (2/8) 
+   Generating static pages (4/8) 
+   Generating static pages (6/8) 
+ ✓ Generating static pages (8/8)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      161 B         105 kB
+├ ○ /_not-found                            993 B         103 kB
+├ ○ /dashboard                             11 kB         237 kB
+├ ○ /login                               3.83 kB         233 kB
+└ ○ /signup                              3.71 kB         233 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/255-99e1d6b668e20fa1.js       45.4 kB
+  ├ chunks/4bd1b696-21f374d1156f834a.js  54.2 kB
+  └ other shared chunks (total)          1.99 kB
+
+
+○  (Static)  prerendered as static content
+
